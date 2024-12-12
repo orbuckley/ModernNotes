@@ -32,17 +32,8 @@ struct NewNoteView: View {
                     TextField("Title", text: $title)
                         .font(.headline)
                     
-                    ZStack(alignment: .topLeading) {
-                        if content.isEmpty {
-                            Text("Write something...")
-                                .foregroundStyle(.gray)
-                                .padding(.top, 8)
-                                .padding(.leading, 5)
-                        }
-                        
-                        TextEditor(text: $content)
-                            .frame(minHeight: 200)
-                    }
+                    MarkdownEditorView(text: $content)
+                        .frame(minHeight: 300)
                 }
                 
                 Section {

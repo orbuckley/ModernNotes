@@ -46,17 +46,8 @@ struct EditNoteView: View {
                     TextField("Title", text: $editedTitle)
                         .font(.headline)
                     
-                    ZStack(alignment: .topLeading) {
-                        if editedContent.isEmpty {
-                            Text("Write something...")
-                                .foregroundStyle(.gray)
-                                .padding(.top, 8)
-                                .padding(.leading, 5)
-                        }
-                        
-                        TextEditor(text: $editedContent)
-                            .frame(minHeight: 200)
-                    }
+                    MarkdownEditorView(text: $editedContent)
+                        .frame(minHeight: 300)
                 }
                 
                 Section {

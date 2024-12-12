@@ -17,8 +17,20 @@ struct Note: Identifiable, Codable {
     // The title of the note, shown in lists and headers
     var title: String
     
-    // The main content of the note
+    // The main content of the note in Markdown format
     var content: String
+    
+    // Computed property to get the rendered Markdown content
+    var renderedContent: AttributedString {
+        MarkdownHelper.attributedString(from: content)
+    }
+    
+    // Returns a plain text preview of the content (first few lines)
+    var contentPreview: String {
+        let lines = content.components(separatedBy: .newlines)
+        let firstLines = lines.prefix(2).joined(separator: "\n")
+        return firstLines.count < content.count ? firstLines + "..." : firstLines
+    }
     
     // When the note was created
     var dateCreated: Date
