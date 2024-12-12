@@ -15,7 +15,7 @@ struct FolderDetailView: View {
     var body: some View {
         List {
             ForEach(folder.sortedNotes()) { note in
-                NoteRow(note: note)
+                MarkdownPreviewRow(note: note)
                     .onTapGesture {
                         selectedNote = note
                         isEditingNote = true

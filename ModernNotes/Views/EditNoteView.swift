@@ -80,6 +80,22 @@ struct EditNoteView: View {
             .navigationTitle("Edit Note")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItemGroup(placement: .primaryAction) {
+                    Menu {
+                        Button(action: convertToMarkdown) {
+                            Label("Convert to Markdown", systemImage: "arrow.2.squarepath")
+                        }
+                        
+                        Button(action: {
+                            // Reset to original content
+                            editedContent = note.content
+                        }) {
+                            Label("Reset Changes", systemImage: "arrow.uturn.backward")
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
+                    }
+                }
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
                         if hasChanges {
@@ -128,6 +144,26 @@ struct EditNoteView: View {
         )
         
         dismiss()
+    }
+    
+    private func convertToMarkdown() {
+        // Show confirmation alert before converting
+        let alert = UIAlertController(
+            title: "Convert to Markdown?",
+            message: "This will attempt to format your text as Markdown. The original formatting will be modified. Continue?",
+            preferredStyle: .alert
+        )
+        
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        alert.addAction(UIAlertAction(title: "Convert", style: .default) { _ in
+            editedContent = MarkdownHelper.convertPlainTextToMarkdown(editedContent)
+        })
+        
+        // Get the current window scene
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let viewController = windowScene.windows.first?.rootViewController {
+            viewController.present(alert, animated: true)
+        }
     }
     
     private func deleteNote() {
