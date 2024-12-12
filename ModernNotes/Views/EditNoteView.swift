@@ -147,19 +147,19 @@ struct EditNoteView: View {
     }
     
     private func convertToMarkdown() {
-        // Show confirmation alert before converting
         let alert = UIAlertController(
             title: "Convert to Markdown?",
-            message: "This will attempt to format your text as Markdown. The original formatting will be modified. Continue?",
+            message: "This will format your text using Markdown syntax. The original text structure will be preserved but enhanced with formatting. Continue?",
             preferredStyle: .alert
         )
         
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
         alert.addAction(UIAlertAction(title: "Convert", style: .default) { _ in
+            // Use our new conversion method
             editedContent = MarkdownHelper.convertPlainTextToMarkdown(editedContent)
         })
         
-        // Get the current window scene
+        // Present the alert
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let viewController = windowScene.windows.first?.rootViewController {
             viewController.present(alert, animated: true)
