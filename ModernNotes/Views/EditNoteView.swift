@@ -13,7 +13,6 @@ struct EditNoteView: View {
     
     @Environment(\.dismiss) private var dismiss
     
-    // State variables to track edited content
     @State private var editedTitle: String
     @State private var editedContent: String
     @State private var isShowingDeleteAlert = false
@@ -28,15 +27,16 @@ struct EditNoteView: View {
         _editedContent = State(initialValue: note.content)
     }
     
-    // Check if content has been modified
+    // Add these computed properties to check for changes and validate save conditions
     private var hasChanges: Bool {
-        editedTitle != note.title || editedContent != note.content
+        // Check if either the title or content has been modified
+        return editedTitle != note.title || editedContent != note.content
     }
     
-    // Validate if we can save changes
     private var canSave: Bool {
-        !editedTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-        hasChanges
+        // Ensure we have at least a non-empty title and that some changes have been made
+        let trimmedTitle = editedTitle.trimmingCharacters(in: .whitespaces)
+        return !trimmedTitle.isEmpty && hasChanges
     }
     
     var body: some View {
@@ -69,7 +69,6 @@ struct EditNoteView: View {
                 }
                 
                 Section {
-                    // Delete button
                     Button(role: .destructive) {
                         isShowingDeleteAlert = true
                     } label: {
@@ -80,22 +79,6 @@ struct EditNoteView: View {
             .navigationTitle("Edit Note")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItemGroup(placement: .primaryAction) {
-                    Menu {
-                        Button(action: convertToMarkdown) {
-                            Label("Convert to Markdown", systemImage: "arrow.2.squarepath")
-                        }
-                        
-                        Button(action: {
-                            // Reset to original content
-                            editedContent = note.content
-                        }) {
-                            Label("Reset Changes", systemImage: "arrow.uturn.backward")
-                        }
-                    } label: {
-                        Image(systemName: "ellipsis.circle")
-                    }
-                }
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
                         if hasChanges {
@@ -113,14 +96,6 @@ struct EditNoteView: View {
                     .disabled(!canSave)
                 }
             }
-            .alert("Delete Note?", isPresented: $isShowingDeleteAlert) {
-                Button("Delete", role: .destructive) {
-                    deleteNote()
-                }
-                Button("Cancel", role: .cancel) {}
-            } message: {
-                Text("Are you sure you want to delete this note? This action cannot be undone.")
-            }
             .alert("Discard Changes?", isPresented: $isShowingDiscardAlert) {
                 Button("Discard", role: .destructive) {
                     dismiss()
@@ -129,60 +104,35 @@ struct EditNoteView: View {
             } message: {
                 Text("Are you sure you want to discard your changes?")
             }
+            .alert("Delete Note?", isPresented: $isShowingDeleteAlert) {
+                Button("Delete", role: .destructive) {
+                    deleteNote()
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("Are you sure you want to delete this note? This action cannot be undone.")
+            }
         }
     }
     
+    // Add these methods to handle saving and deleting
     private func saveChanges() {
-        let trimmedTitle = editedTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedTitle = editedTitle.trimmingCharacters(in: .whitespaces)
         guard !trimmedTitle.isEmpty else { return }
         
+        // Call the view model to update the note
         viewModel.updateNote(
             note,
             title: trimmedTitle,
-            content: editedContent.trimmingCharacters(in: .whitespacesAndNewlines),
+            content: editedContent,
             in: folder
         )
         
         dismiss()
     }
     
-    private func convertToMarkdown() {
-        let alert = UIAlertController(
-            title: "Convert to Markdown?",
-            message: "This will format your text using Markdown syntax. The original text structure will be preserved but enhanced with formatting. Continue?",
-            preferredStyle: .alert
-        )
-        
-        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-        alert.addAction(UIAlertAction(title: "Convert", style: .default) { _ in
-            // Use our new conversion method
-            editedContent = MarkdownHelper.convertPlainTextToMarkdown(editedContent)
-        })
-        
-        // Present the alert
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let viewController = windowScene.windows.first?.rootViewController {
-            viewController.present(alert, animated: true)
-        }
-    }
-    
     private func deleteNote() {
         viewModel.deleteNote(note, from: folder)
         dismiss()
-    }
-}
-
-// Helper view for displaying note information
-struct InfoRow: View {
-    let label: String
-    let value: String
-    
-    var body: some View {
-        HStack {
-            Text(label)
-                .foregroundStyle(.secondary)
-            Spacer()
-            Text(value)
-        }
     }
 }
