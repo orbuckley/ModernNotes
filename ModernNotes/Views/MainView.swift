@@ -7,8 +7,8 @@
 import SwiftUI
 
 struct MainView: View {
-    // StateObject ensures our view model persists across view updates
-    @StateObject private var viewModel = NotesViewModel()
+    // Use the shared view model provided via the environment
+    @EnvironmentObject private var viewModel: NotesViewModel
     @State private var isAddingFolder = false
     @State private var isAddingNote = false
     @State private var showingSidebar: Bool = true
@@ -99,5 +99,6 @@ struct SidebarView: View {
 struct MainView_Previews: PreviewProvider {
     static var previews: some View {
         MainView()
+            .environmentObject(NotesViewModel())
     }
 }
